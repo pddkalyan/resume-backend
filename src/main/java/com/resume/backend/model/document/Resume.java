@@ -1,6 +1,5 @@
 package com.resume.backend.model.document;
 
-import com.resume.backend.model.Project;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,7 +19,6 @@ public class Resume {
     private List<Experience> experience = new ArrayList<>();
     private List<Education> education = new ArrayList<>();
     private List<String> skills = new ArrayList<>();
-    private List<Project> projects;
     // --- NEW: Template Selection ---
     private String selectedTemplate = "modern"; // Default value
 
@@ -33,15 +31,6 @@ public class Resume {
     }
 
     // --- GETTERS & SETTERS ---
-
-
-    public List<Project> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(List<Project> projects) {
-        this.projects = projects;
-    }
 
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
@@ -63,24 +52,6 @@ public class Resume {
         private String fullName;
         private String phone;
         private String linkedInUrl;
-        private String githubUrl;   // Missing in your backend!
-        private String email;       // Missing or misnamed in your backend!
-
-        public String getGithubUrl() {
-            return githubUrl;
-        }
-
-        public void setGithubUrl(String githubUrl) {
-            this.githubUrl = githubUrl;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
 
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }

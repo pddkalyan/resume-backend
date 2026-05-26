@@ -110,6 +110,8 @@ public class Resume {
         private String institution;
         private String degree;
         private String graduationYear;
+        private String gpa;
+
 
         public String getInstitution() { return institution; }
         public void setInstitution(String institution) { this.institution = institution; }
@@ -117,5 +119,13 @@ public class Resume {
         public void setDegree(String degree) { this.degree = degree; }
         public String getGraduationYear() { return graduationYear; }
         public void setGraduationYear(String graduationYear) { this.graduationYear = graduationYear; }
+        public String getGpa() {
+            return gpa;
+        }
+
+        public void setGpa(String gpa) {
+            this.gpa = gpa;
+        }
+
     }
 }

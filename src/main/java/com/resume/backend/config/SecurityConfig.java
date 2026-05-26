@@ -39,12 +39,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/picklist/**", "/error").permitAll()
-                        .requestMatchers("/api/resumes/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/resumes/public/**").permitAll() // <-- ADD THIS LINE
-                        .requestMatchers("/api/ats/**").authenticated()
-                        .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers("/api/templates").authenticated()
+                                .requestMatchers("/api/auth/**", "/api/picklist/**", "/error").permitAll()
+                                .requestMatchers("/api/resumes/**").authenticated()
+                                .requestMatchers(HttpMethod.GET, "/api/resumes/public/**").permitAll() // <-- ADD THIS LINE
+                                .requestMatchers("/api/ats/**").authenticated()
+                                .anyRequest().authenticated()
                 )
                 // 2. Tell Spring to run our scanner BEFORE it normally checks for a password
                 .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);

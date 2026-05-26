@@ -5,6 +5,7 @@ import com.resume.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value; // <-- NEW IMPORT
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -39,6 +40,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/picklist/**", "/error").permitAll()
+                        .requestMatchers("/api/resumes/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/resumes/public/**").permitAll() // <-- ADD THIS LINE
+                        .requestMatchers("/api/ats/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 // 2. Tell Spring to run our scanner BEFORE it normally checks for a password

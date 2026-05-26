@@ -141,4 +141,12 @@ public class ResumeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting resume: " + e.getMessage());
         }
     }
+
+    @GetMapping("/public/{id}")
+    public ResponseEntity<?> getPublicResume(@PathVariable String id) {
+        // Fetch the resume directly by ID without checking the JWT user ID
+        return resumeRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }

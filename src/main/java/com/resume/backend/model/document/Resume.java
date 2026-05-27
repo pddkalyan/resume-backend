@@ -14,16 +14,39 @@ public class Resume {
     private String id; // MongoDB automatically generates this String ID
 
     private String userEmail; // The crucial bridge back to your PostgreSQL User!
-    private String title;     // e.g., "Java Backend Developer Resume"
+    private String title; // e.g., "Java Backend Developer Resume"
 
     private PersonalInfo personalInfo = new PersonalInfo();
     private List<Experience> experience = new ArrayList<>();
     private List<Education> education = new ArrayList<>();
     private List<String> skills = new ArrayList<>();
     private List<Project> projects;
-    // --- NEW: Template Selection ---
+
+    // --- Existing: Template Selection ---
     private String selectedTemplate = "modern"; // Default value
 
+    // --- NEW: Public Sharing Fields ---
+    private boolean isPublic = false;
+    private String shareCode;
+
+    // --- NEW GETTERS & SETTERS FOR SHARING ---
+    public boolean isPublic() {
+        return isPublic;
+    }
+
+    public void setPublic(boolean isPublic) {
+        this.isPublic = isPublic;
+    }
+
+    public String getShareCode() {
+        return shareCode;
+    }
+
+    public void setShareCode(String shareCode) {
+        this.shareCode = shareCode;
+    }
+
+    // --- EXISTING GETTERS & SETTERS ---
     public String getSelectedTemplate() {
         return selectedTemplate;
     }
@@ -31,9 +54,6 @@ public class Resume {
     public void setSelectedTemplate(String selectedTemplate) {
         this.selectedTemplate = selectedTemplate;
     }
-
-    // --- GETTERS & SETTERS ---
-
 
     public List<Project> getProjects() {
         return projects;
@@ -63,25 +83,13 @@ public class Resume {
         private String fullName;
         private String phone;
         private String linkedInUrl;
-        private String githubUrl;   // Missing in your backend!
-        private String email;       // Missing or misnamed in your backend!
+        private String githubUrl;
+        private String email;
 
-        public String getGithubUrl() {
-            return githubUrl;
-        }
-
-        public void setGithubUrl(String githubUrl) {
-            this.githubUrl = githubUrl;
-        }
-
-        public String getEmail() {
-            return email;
-        }
-
-        public void setEmail(String email) {
-            this.email = email;
-        }
-
+        public String getGithubUrl() { return githubUrl; }
+        public void setGithubUrl(String githubUrl) { this.githubUrl = githubUrl; }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
         public String getPhone() { return phone; }
@@ -110,8 +118,6 @@ public class Resume {
         private String institution;
         private String degree;
         private String graduationYear;
-        private String gpa;
-
 
         public String getInstitution() { return institution; }
         public void setInstitution(String institution) { this.institution = institution; }
@@ -119,13 +125,5 @@ public class Resume {
         public void setDegree(String degree) { this.degree = degree; }
         public String getGraduationYear() { return graduationYear; }
         public void setGraduationYear(String graduationYear) { this.graduationYear = graduationYear; }
-        public String getGpa() {
-            return gpa;
-        }
-
-        public void setGpa(String gpa) {
-            this.gpa = gpa;
-        }
-
     }
 }

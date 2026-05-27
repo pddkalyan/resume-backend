@@ -5,11 +5,15 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional; // <-- NEW IMPORT
 
 @Repository
 public interface ResumeRepository extends MongoRepository<Resume, String> {
 
     // Spring Boot automatically translates this exact method name into a MongoDB query!
     List<Resume> findByUserEmail(String userEmail);
+
+    // --- NEW: Find a resume by its public share code ---
+    Optional<Resume> findByShareCode(String shareCode);
 
 }

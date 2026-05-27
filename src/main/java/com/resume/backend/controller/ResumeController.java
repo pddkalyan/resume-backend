@@ -150,6 +150,7 @@ public class ResumeController {
     }
 
     // --- UPDATED: PUBLIC ENDPOINT - Fetch via share code, checking visibility ---
+    // --- UPDATED: PUBLIC ENDPOINT ---
     @GetMapping("/public/{shareCode}")
     public ResponseEntity<?> getPublicResume(@PathVariable String shareCode) {
         Optional<Resume> optionalResume = resumeRepository.findByShareCode(shareCode);
@@ -161,11 +162,14 @@ public class ResumeController {
 
         Resume resume = optionalResume.get();
 
-        // Security Check: Verify the owner hasn't turned sharing off
         if (!resume.isPublic()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Map.of("error", "This resume is no longer public."));
         }
+
+        // --- NEW: Increment the view counter and save to DB ---
+        resume.setViewCount(resume.getViewCount() + 1);
+        resumeRepository.save(resume);
 
         return ResponseEntity.ok(resume);
     }

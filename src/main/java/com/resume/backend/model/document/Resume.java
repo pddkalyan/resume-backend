@@ -29,6 +29,17 @@ public class Resume {
     private boolean isPublic = false;
     private String shareCode;
 
+    private int viewCount = 0;
+
+    // --- NEW GETTER & SETTER ---
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
+    }
+
     // --- NEW GETTERS & SETTERS FOR SHARING ---
     public boolean isPublic() {
         return isPublic;

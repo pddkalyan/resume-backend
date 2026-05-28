@@ -139,6 +139,12 @@ public class ResumeController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateResume(@PathVariable String id, @RequestBody Resume updatedResume, @RequestHeader("Authorization") String token) {
         try {
+            // --- NEW PAYWALL CHECK: ONLY PRO USERS CAN EDIT ---
+            if (!isUserPro(token)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "PREMIUM_REQUIRED", "message", "Editing existing resumes is a Pro feature."));
+            }
+
             String jwt = token.substring(7);
             String userEmail = jwtUtil.extractEmail(jwt);
             Optional<Resume> existingResumeOpt = resumeRepository.findById(id);
@@ -191,6 +197,12 @@ public class ResumeController {
     @PutMapping("/{id}/share")
     public ResponseEntity<?> toggleShareStatus(@PathVariable String id, @RequestBody Map<String, Boolean> payload, @RequestHeader("Authorization") String token) {
         try {
+            // --- NEW PAYWALL CHECK: ONLY PRO USERS CAN SHARE ---
+            if (!isUserPro(token)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "PREMIUM_REQUIRED", "message", "Public sharing is a Pro feature."));
+            }
+
             String jwt = token.substring(7);
             String userEmail = jwtUtil.extractEmail(jwt);
             Optional<Resume> optionalResume = resumeRepository.findById(id);
@@ -224,7 +236,6 @@ public class ResumeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Error updating sharing status: " + e.getMessage()));
         }
     }
-
     @GetMapping("/public/{shareCode}")
     public ResponseEntity<?> getPublicResume(@PathVariable String shareCode) {
         Optional<Resume> optionalResume = resumeRepository.findByShareCode(shareCode);

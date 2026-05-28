@@ -9,18 +9,18 @@ import java.time.LocalDateTime;
 @Document(collection = "users")
 public class User {
 
-    // Native Spring Data ID
     @Id
     private String id;
 
-    // Enforces uniqueness at the database level
     @Indexed(unique = true)
     private String email;
 
     private String passwordHash;
 
-    // Core privacy feature: tracks if they consented to save data
     private boolean saveConsent = false;
+
+    // --- THE FIX: Pro Status Flag ---
+    private boolean isPro = false;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -37,6 +37,9 @@ public class User {
 
     public boolean isSaveConsent() { return saveConsent; }
     public void setSaveConsent(boolean saveConsent) { this.saveConsent = saveConsent; }
+
+    public boolean isPro() { return isPro; }
+    public void setPro(boolean pro) { this.isPro = pro; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

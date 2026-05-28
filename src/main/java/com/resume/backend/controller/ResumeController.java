@@ -1,17 +1,25 @@
 package com.resume.backend.controller;
 
+import com.resume.backend.model.User;
 import com.resume.backend.model.document.Resume;
 import com.resume.backend.repository.ResumeRepository;
+import com.resume.backend.repository.UserRepository;
+import com.resume.backend.security.JwtUtil;
+import com.resume.backend.service.ExtractionService;
+import com.resume.backend.service.CloneTemplateService;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
-import com.resume.backend.security.JwtUtil;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.HashMap;
 import java.util.List;
-import java.util.Map;       // <-- NEW IMPORT
-import java.util.HashMap;   // <-- NEW IMPORT
-import java.util.UUID;      // <-- NEW IMPORT
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/resumes")
@@ -19,11 +27,78 @@ public class ResumeController {
 
     private final ResumeRepository resumeRepository;
     private final JwtUtil jwtUtil;
+    private final ExtractionService extractionService;
+    private final CloneTemplateService cloneTemplateService;
+    private final UserRepository userRepository;
 
-    public ResumeController(ResumeRepository resumeRepository, JwtUtil jwtUtil) {
+    @Autowired
+    public ResumeController(ResumeRepository resumeRepository,
+                            JwtUtil jwtUtil,
+                            ExtractionService extractionService,
+                            CloneTemplateService cloneTemplateService,
+                            UserRepository userRepository) {
         this.resumeRepository = resumeRepository;
         this.jwtUtil = jwtUtil;
+        this.extractionService = extractionService;
+        this.cloneTemplateService = cloneTemplateService;
+        this.userRepository = userRepository;
     }
+
+    // --- FIX: Bulletproof Paywall Check using Explicit JWT parsing ---
+    private boolean isUserPro(String token) {
+        try {
+            if (token != null && token.startsWith("Bearer ")) {
+                String jwt = token.substring(7);
+                String email = jwtUtil.extractEmail(jwt);
+                return userRepository.findByEmail(email).map(User::isPro).orElse(false);
+            }
+        } catch (Exception e) {
+            System.out.println("Error decoding JWT for Pro check: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // ==========================================
+    // 1. AI IMPORT & CLONING LOGIC (Paywalled)
+    // ==========================================
+
+    @PostMapping("/extract")
+    public ResponseEntity<?> extractResumeData(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String token) {
+        if (!isUserPro(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "PREMIUM_REQUIRED", "message", "The Magic AI Data Assistant is a Pro feature."));
+        }
+
+        if (file.isEmpty()) return ResponseEntity.badRequest().body(Map.of("error", "File upload payload is empty."));
+
+        try {
+            String extractedJson = extractionService.extractResumeData(file);
+            return ResponseEntity.ok(extractedJson);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "AI data parsing failed."));
+        }
+    }
+
+    @PostMapping("/clone-design")
+    public ResponseEntity<?> cloneDesign(@RequestParam("file") MultipartFile file, @RequestHeader("Authorization") String token) {
+        if (!isUserPro(token)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "PREMIUM_REQUIRED", "message", "AI Design Cloning is a Pro feature."));
+        }
+
+        if (file.isEmpty()) return ResponseEntity.badRequest().body(Map.of("error", "File upload payload is empty."));
+
+        try {
+            Map<String, Object> safeTemplateData = cloneTemplateService.cloneDesign(file);
+            return ResponseEntity.ok(safeTemplateData);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "AI design cloning failed."));
+        }
+    }
+
+    // ==========================================
+    // 2. STANDARD CRUD OPERATIONS (Free)
+    // ==========================================
 
     @PostMapping
     public ResponseEntity<Resume> saveResume(@RequestBody Resume resume, Authentication authentication) {
@@ -109,7 +184,10 @@ public class ResumeController {
         }
     }
 
-    // --- NEW: SECURED ENDPOINT - Toggle visibility and generate URL code ---
+    // ==========================================
+    // 3. PUBLIC SHARING LOGIC
+    // ==========================================
+
     @PutMapping("/{id}/share")
     public ResponseEntity<?> toggleShareStatus(@PathVariable String id, @RequestBody Map<String, Boolean> payload, @RequestHeader("Authorization") String token) {
         try {
@@ -123,7 +201,6 @@ public class ResumeController {
 
             Resume resume = optionalResume.get();
 
-            // Security Check: Ensure the user actually owns this resume before changing sharing settings
             if (!resume.getUserEmail().equals(userEmail)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "You do not have permission to share this resume"));
             }
@@ -131,7 +208,6 @@ public class ResumeController {
             boolean makePublic = payload.getOrDefault("isPublic", false);
             resume.setPublic(makePublic);
 
-            // Generate a clean, 8-character unique share code if missing
             if (makePublic && (resume.getShareCode() == null || resume.getShareCode().isEmpty())) {
                 String uniqueCode = UUID.randomUUID().toString().substring(0, 8);
                 resume.setShareCode(uniqueCode);
@@ -149,8 +225,6 @@ public class ResumeController {
         }
     }
 
-    // --- UPDATED: PUBLIC ENDPOINT - Fetch via share code, checking visibility ---
-    // --- UPDATED: PUBLIC ENDPOINT ---
     @GetMapping("/public/{shareCode}")
     public ResponseEntity<?> getPublicResume(@PathVariable String shareCode) {
         Optional<Resume> optionalResume = resumeRepository.findByShareCode(shareCode);
@@ -167,7 +241,6 @@ public class ResumeController {
                     .body(Map.of("error", "This resume is no longer public."));
         }
 
-        // --- NEW: Increment the view counter and save to DB ---
         resume.setViewCount(resume.getViewCount() + 1);
         resumeRepository.save(resume);
 

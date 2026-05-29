@@ -6,6 +6,7 @@ import com.resume.backend.security.JwtUtil;
 import com.resume.backend.service.AtsScoringService;
 import com.resume.backend.service.CoverLetterService;
 import com.resume.backend.service.InterviewPrepService;
+import com.resume.backend.service.UserService; // <-- ADDED
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,9 @@ public class AtsController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService; // <-- ADDED to check AI Credits
 
     // --- SECURITY HELPER ---
     private boolean isUserPro(String token) {
@@ -66,8 +70,23 @@ public class AtsController {
         return ResponseEntity.ok(analysisResultJson);
     }
 
+    // <-- UPDATED: Added Authorization Header to get the user's token
     @PostMapping("/cover-letter")
-    public ResponseEntity<?> generateCoverLetter(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<?> generateCoverLetter(@RequestBody Map<String, String> payload, @RequestHeader("Authorization") String token) {
+
+        // 1. Identify the user
+        String email = "";
+        if (token != null && token.startsWith("Bearer ")) {
+            String jwt = token.substring(7);
+            email = jwtUtil.extractEmail(jwt);
+        }
+
+        // 2. THE BOUNCER: Check and consume 1 AI Credit
+        if (!userService.consumeAiCredit(email)) {
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                    .body(Map.of("error", "Insufficient AI Credits. Please upgrade to PRO or buy credits."));
+        }
+
         String resumeJson = payload.get("resumeData");
         String jobDescription = payload.get("jobDescription");
 

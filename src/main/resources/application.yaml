@@ -82,3 +82,15 @@ gemini:
   api:
     key: ${GEMINI_API_KEY}
     url: https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent
+
+razorpay:
+  key:
+    id: rzp_test_Sut8dYwFb5t2ly
+    secret: P8Ja2Hi5uie186jEneSVyWWe
+  webhook:
+    secret: nnvdsncknnkn@BFG;EGSDSDN
+
+app:
+  pricing:
+    pro-lifetime:
+      base-price: 1499

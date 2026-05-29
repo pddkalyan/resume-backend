@@ -37,11 +37,17 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers("/api/auth/**", "/api/picklist/**", "/error").permitAll()
-                        .requestMatchers("/api/auth/**", "/api/picklist/**", "/error", "/api/resumes/public/**", "/api/templates/public/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/resumes/public/**").permitAll() // <-- Ensure this is present
-                        .requestMatchers("/api/resumes/**").authenticated()
-                        .requestMatchers("/api/ats/**").authenticated()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/api/auth/**", "/api/picklist/**", "/error", "/api/resumes/public/**", "/api/templates/public/**", "/api/webhooks/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/resumes/public/**").permitAll() // <-- Ensure this is present
+                                .requestMatchers("/api/resumes/**").authenticated()
+                                .requestMatchers("/api/ats/**").authenticated()
+                                .requestMatchers("/api/users/").authenticated()
+
+                                // --- ADDED: Secure Payment and AI Endpoints ---
+                                .requestMatchers("/api/payments/**").authenticated()
+                                .requestMatchers("/api/ai/**").authenticated()
+
+                                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 

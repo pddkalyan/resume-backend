@@ -26,6 +26,8 @@ dependencies {
 
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.jsoup:jsoup:1.17.2'
+    implementation 'com.razorpay:razorpay-java:1.4.4' // Check for latest version
+    implementation 'org.json:json:20231013' // Required for Razorpay JSON parsing
 
     // --- ADDED JWT LIBRARIES ---
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'

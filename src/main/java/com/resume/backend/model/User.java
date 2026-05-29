@@ -22,7 +22,14 @@ public class User {
     // --- THE FIX: Pro Status Flag ---
     private boolean isPro = false;
 
+    // --- NEW: Time-bound Pro Pass and AI Credits ---
+    private LocalDateTime proValidUntil;
+
+    // Starts with 3 free credits for new sign-ups
+    private int aiCredits = 3;
+
     private LocalDateTime createdAt = LocalDateTime.now();
+
 
     // --- GETTERS AND SETTERS ---
 
@@ -41,6 +48,24 @@ public class User {
     public boolean isPro() { return isPro; }
     public void setPro(boolean pro) { this.isPro = pro; }
 
+    public LocalDateTime getProValidUntil() { return proValidUntil; }
+    public void setProValidUntil(LocalDateTime proValidUntil) { this.proValidUntil = proValidUntil; }
+
+    public int getAiCredits() { return aiCredits; }
+    public void setAiCredits(int aiCredits) { this.aiCredits = aiCredits; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+
+    // --- HELPER METHODS FOR PAYMENT LOGIC ---
+
+    public void addAiCredits(int amount) {
+        this.aiCredits += amount;
+    }
+
+    public boolean isProActive() {
+        // Returns true if manually marked as Pro OR if they have an active time-bound Razorpay pass
+        return isPro || (proValidUntil != null && proValidUntil.isAfter(LocalDateTime.now()));
+    }
 }
